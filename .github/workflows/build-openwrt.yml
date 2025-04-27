@@ -34,6 +34,20 @@ jobs:
     - name: Initialize environment
       run: |
         export DEBIAN_FRONTEND=noninteractive
+
+        # Ensure no dpkg lock
+        echo "Checking for dpkg lock..."
+        while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
+            echo "Another apt process is running. Waiting 2 seconds..."
+            sleep 2
+        done
+
+        echo "Starting apt-get update..."
+        sudo apt-get -qq update
+
+        echo "Installing build dependencies..."
+        sudo apt-get -qq install -y --no-install-recommends ack antlr3 asciidoc ... || { echo \"apt install failed\"; exit 1; }
+
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo apt-get -qq update
         sudo apt-get -qq install -y --no-install-recommends ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \

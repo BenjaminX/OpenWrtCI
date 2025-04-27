@@ -15,7 +15,7 @@ env:
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
   UPLOAD_WETRANSFER: false
-  UPLOAD_RELEASE: false  # release 上传禁用，避免单文件大于 2G 报错
+  UPLOAD_RELEASE: false
   TZ: Asia/Shanghai
 
 jobs:
@@ -33,6 +33,7 @@ jobs:
 
     - name: Initialize environment
       run: |
+        export DEBIAN_FRONTEND=noninteractive
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo apt-get -qq update
         sudo apt-get -qq install -y --no-install-recommends ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
@@ -41,7 +42,7 @@ jobs:
             libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev \
             libreadline-dev libssl-dev libtool llvm lrzsz msmtp ninja-build p7zip p7zip-full patch pkgconf \
             python3 python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion \
-            swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+            swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev || { echo "apt install failed"; exit 1; }
         sudo apt-get -qq autoremove --purge
         sudo apt-get -qq clean
         sudo timedatectl set-timezone "Asia/Shanghai"
@@ -107,7 +108,3 @@ jobs:
       run: |
         cd openwrt/bin/targets/*/*
         rm -f firmware.tar
-
-    # Optionally, later you can reassemble them manually:
-    # cat firmware.tar.part* > firmware.tar
-    # tar -xvf firmware.tar
